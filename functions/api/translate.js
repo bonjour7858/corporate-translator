@@ -4,10 +4,15 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type",
 };
 
+// Intercepte la requête de vérification CORS du navigateur
 export async function onRequestOptions() {
-  return new Response(null, { headers: corsHeaders });
+  return new Response(null, {
+    status: 204,
+    headers: corsHeaders,
+  });
 }
 
+// Traite la vraie requête de traduction
 export async function onRequestPost(context) {
   try {
     const { request, env } = context;
@@ -23,7 +28,7 @@ export async function onRequestPost(context) {
     const GROQ_API_KEY = env.GROQ_API_KEY;
     if (!GROQ_API_KEY) {
       return new Response(
-        JSON.stringify({ error: "Clé GROQ_API_KEY introuvable." }),
+        JSON.stringify({ error: "Clé GROQ_API_KEY non configurée sur Cloudflare." }),
         { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
     }
