@@ -17,7 +17,6 @@
                             border: '#1f293a',
                             accent: '#3b82f6',
                             'accent-hover': '#60a5fa',
-                            vip: '#f59e0b' // Gold pour le VIP
                         }
                     }
                 }
@@ -46,13 +45,14 @@
                 </div>
                 <h1 class="text-xl font-bold text-white tracking-tight flex items-center gap-2">
                     Corporate Translator
+                    <!-- Indicateur de Compte Local -->
                     <span id="userBadge" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-gray-800 text-gray-400 border border-brand-border">Free Tier</span>
                 </h1>
             </div>
             
             <div class="flex items-center gap-2 sm:gap-3">
                 <!-- Bouton Pass VIP Leetchi -->
-                <button id="openVipModalBtn" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-bold text-xs shadow-lg shadow-yellow-500/10 hover:brightness-110 transition">
+                <button id="openVipModalBtn" type="button" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-bold text-xs shadow-lg shadow-yellow-500/10 hover:brightness-110 transition cursor-pointer">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
                     Pass VIP Leetchi
                 </button>
@@ -160,7 +160,7 @@
     <!-- MODAL PASS VIP / LEETCHI -->
     <div id="vipModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-brand-panel border border-brand-border rounded-3xl max-w-md w-full p-6 shadow-2xl relative space-y-5">
-            <button id="closeVipModalBtn" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+            <button id="closeVipModalBtn" class="absolute top-4 right-4 text-gray-400 hover:text-white cursor-pointer">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
             <div class="text-center space-y-2">
@@ -168,15 +168,15 @@
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
                 </div>
                 <h3 class="text-xl font-bold text-white">Débloquez le Pass VIP</h3>
-                <p class="text-xs text-gray-400">Soutenez le projet via notre cagnotte Leetchi pour obtenir un accès illimité et des fonctionnalités exclusives.</p>
+                <p class="text-xs text-gray-400">Soutenez le projet via notre cagnotte Leetchi pour obtenir un accès permanent et un badge de compte exclusif.</p>
             </div>
 
             <div class="space-y-3 bg-brand-dark p-4 rounded-2xl border border-brand-border text-xs">
                 <p class="font-semibold text-gray-300">Comment obtenir son code VIP ?</p>
                 <ol class="list-decimal list-inside space-y-1 text-gray-400">
-                    <li>Participez sur la cagnotte Leetchi du créateur.</li>
-                    <li>Récupérez votre code secret d'activation (reçu par email ou message).</li>
-                    <li>Entrez votre code ci-dessous pour activer le badge VIP.</li>
+                    <li>Participez sur la cagnotte Leetchi.</li>
+                    <li>Récupérez votre code secret d'activation.</li>
+                    <li>Entrez votre code ci-dessous pour lier le pass à votre navigateur.</li>
                 </ol>
                 <a href="https://www.leetchi.com" target="_blank" class="block text-center py-2.5 mt-2 rounded-xl bg-amber-500 text-black font-bold hover:bg-amber-400 transition">Accéder à la cagnotte Leetchi ↗</a>
             </div>
@@ -184,8 +184,8 @@
             <div class="space-y-2">
                 <label class="text-xs font-medium text-gray-400">Entrer votre code d'activation VIP :</label>
                 <div class="flex gap-2">
-                    <input type="text" id="vipCodeInput" placeholder="ex: VIP-XXXX-2026" class="flex-grow bg-brand-dark border border-brand-border rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
-                    <button id="activateVipBtn" class="px-4 py-2 bg-brand-accent hover:bg-brand-accent-hover text-white text-xs font-semibold rounded-xl transition">Activer</button>
+                    <input type="text" id="vipCodeInput" placeholder="ex: VIP-BONJOUR-2026" class="flex-grow bg-brand-dark border border-brand-border rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                    <button id="activateVipBtn" class="px-4 py-2 bg-brand-accent hover:bg-brand-accent-hover text-white text-xs font-semibold rounded-xl transition cursor-pointer">Activer</button>
                 </div>
                 <p id="vipErrorMsg" class="text-[10px] text-red-400 hidden"></p>
             </div>
@@ -211,7 +211,6 @@
         </div>
     </aside>
 
-    <!-- Footer -->
     <footer class="border-t border-brand-border bg-brand-panel mt-12 py-6">
         <div class="max-w-7xl mx-auto px-4 text-center text-xs text-gray-500 space-y-1">
             <p>© bonjour7858, all rights reserved.</p>
