@@ -3,37 +3,31 @@ export async function onRequestPost(context) {
     const { request, env } = context;
     const { text } = await request.json();
 
-    // 1. Validation du texte envoyé par l'utilisateur
+    // 1. Validation de l'entrée utilisateur
     if (!text || text.trim().length === 0 || text.length > 500) {
       return new Response(
         JSON.stringify({ error: "Texte invalide ou trop long (500 caractères max)." }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json" }
-        }
+        { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
-    // 2. Vérification que la clé GROQ_API_KEY existe dans Cloudflare Pages
+    // 2. Vérification de la clé d'API Groq
     const GROQ_API_KEY = env.GROQ_API_KEY;
     if (!GROQ_API_KEY) {
       return new Response(
-        JSON.stringify({ error: "Clé GROQ_API_KEY introuvable dans Cloudflare Pages." }),
-        {
-          status: 500,
-          headers: { "Content-Type": "application/json" }
-        }
+        JSON.stringify({ error: "Clé GROQ_API_KEY introuvable dans la configuration Cloudflare Pages." }),
+        { status: 500, headers: { "Content-Type": "application/json" } }
       );
     }
 
-    // 3. Consignes données à l'IA (Prompt Système)
-    const systemPrompt = `Tu es un consultant exécutif de haut niveau spécialisé dans la communication corporate. 
-Ta tâche est de reformuler le message brut, franc ou familier de l'utilisateur pour le rendre extrêmement professionnel, diplomatique, élégant et adapté aux standards exécutifs (pour un email d'entreprise ou Slack).
+    // 3. System Prompt pour l'IA
+    const systemPrompt = `Tu es un consultant exécutif de haut niveau spécialisé dans la communication d'entreprise. 
+Ta tâche est de reformuler le message brut, franc ou familier fourni par l'utilisateur pour le rendre extrêmement professionnel, diplomatique, élégant et adapté aux standards exécutifs (pour un email d'entreprise ou Slack).
 Règles strictes :
 1. Réponds UNIQUEMENT avec la version professionnelle reformulée en français.
-2. Ne mets aucun commentaire, aucune note d'introduction ni de conclusion.`;
+2. Ne mets aucun commentaire, aucun titre, aucune note d'introduction ni de conclusion.`;
 
-    // 4. Appel sécurisé à l'API Groq (Llama 3)
+    // 4. Appel à l'API Groq (Llama 3.3)
     const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -56,31 +50,22 @@ Règles strictes :
     if (!groqResponse.ok) {
       return new Response(
         JSON.stringify({ error: groqData.error?.message || "Erreur de l'API Groq" }),
-        {
-          status: groqResponse.status,
-          headers: { "Content-Type": "application/json" }
-        }
+        { status: groqResponse.status, headers: { "Content-Type": "application/json" } }
       );
     }
 
     const resultText = groqData.choices[0]?.message?.content?.trim();
 
-    // 5. Renvoi de la réponse au site
+    // 5. Réponse envoyée au frontend
     return new Response(
       JSON.stringify({ result: resultText }),
-      {
-        status: 200,
-        headers: { "Content-Type": "application/json" }
-      }
+      { status: 200, headers: { "Content-Type": "application/json" } }
     );
 
   } catch (err) {
     return new Response(
       JSON.stringify({ error: "Erreur serveur : " + err.message }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json" }
-      }
+      { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
 }
