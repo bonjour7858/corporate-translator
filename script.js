@@ -10,20 +10,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const copyBtn = document.getElementById('copyBtn');
     const copyBtnText = document.getElementById('copyBtnText');
 
+    // Compteur de caractères
     inputText.addEventListener('input', () => {
         charCount.textContent = `${inputText.value.length}/500`;
     });
 
+    // Bouton Effacer
     clearBtn.addEventListener('click', () => {
         inputText.value = '';
         charCount.textContent = '0/500';
         inputText.focus();
     });
 
+    // Bouton Soumettre
     submitBtn.addEventListener('click', async () => {
         const text = inputText.value.trim();
         if (!text) return;
 
+        // UI : état de chargement
         submitBtn.disabled = true;
         submitBtnText.textContent = 'Traitement...';
         placeholderText.classList.add('hidden');
@@ -33,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
         copyBtn.disabled = true;
 
         try {
-            // Cloudflare relie automatiquement cette route vers functions/api/translate.js
+            // Appel vers la Cloudflare Function via l'URL relative /api/translate
             const response = await fetch('/api/translate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -65,6 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Bouton Copier
     copyBtn.addEventListener('click', () => {
         navigator.clipboard.writeText(outputText.textContent).then(() => {
             copyBtnText.textContent = "Copié !";
