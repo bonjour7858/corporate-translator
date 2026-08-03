@@ -10,15 +10,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const copyBtn = document.getElementById('copyBtn');
     const copyBtnText = document.getElementById('copyBtnText');
 
-    // 🔴 REMPLACE CETTE URL par ton lien Cloudflare exact (en .pages.dev)
-    const API_URL = 'https://corporate-translator.bonjour7858.workers.dev/';
+    // 🎯 URL complète pointant directement vers ton API sur Cloudflare
+    const API_URL = 'https://corporate-translator.bonjour7858.workers.dev/api/translate';
 
     // Compteur de caractères
     inputText.addEventListener('input', () => {
         charCount.textContent = `${inputText.value.length}/500`;
     });
 
-    // Effacer le champ
+    // Effacer le champ texte
     clearBtn.addEventListener('click', () => {
         inputText.value = '';
         charCount.textContent = '0/500';
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const text = inputText.value.trim();
         if (!text) return;
 
-        // UI : état de chargement
+        // Interface utilisateur : état de chargement
         submitBtn.disabled = true;
         submitBtnText.textContent = 'Traitement...';
         placeholderText.classList.add('hidden');
@@ -40,10 +40,12 @@ document.addEventListener('DOMContentLoaded', () => {
         copyBtn.disabled = true;
 
         try {
-            // On appelle l'URL absolue de Cloudflare au lieu de la route relative
+            // Requéte POST vers Cloudflare
             const response = await fetch(API_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json' 
+                },
                 body: JSON.stringify({ text })
             });
 
@@ -58,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 outputText.classList.add('fade-in-text');
                 copyBtn.disabled = false;
             } else {
-                outputText.textContent = "Erreur : " + (data.error || "Impossible de traiter le message.");
+                outputText.textContent = "Erreur : " + (data.error || "Impossible de traiter la demande.");
                 outputText.classList.remove('hidden');
             }
         } catch (err) {
@@ -72,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Copier le résultat
+    // Copier la réponse dans le presse-papier
     copyBtn.addEventListener('click', () => {
         navigator.clipboard.writeText(outputText.textContent).then(() => {
             copyBtnText.textContent = "Copié !";
