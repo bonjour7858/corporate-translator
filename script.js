@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // 📌 Éléments HTML
     const inputText = document.getElementById('inputText');
     const charCount = document.getElementById('charCount');
     const outputText = document.getElementById('outputText');
@@ -13,10 +12,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const outputActions = document.getElementById('outputActions');
     const regenBtn = document.getElementById('regenBtn');
     
-    // Tonalités & Langue
     const toneBtns = document.querySelectorAll('.tone-btn');
     const outputLang = document.getElementById('outputLang');
     let currentTone = 'standard';
+
+    // Modal VIP
+    const openVipModalBtn = document.getElementById('openVipModalBtn');
+    const closeVipModalBtn = document.getElementById('closeVipModalBtn');
+    const vipModal = document.getElementById('vipModal');
+    const activateVipBtn = document.getElementById('activateVipBtn');
+    const vipCodeInput = document.getElementById('vipCodeInput');
+    const vipErrorMsg = document.getElementById('vipErrorMsg');
+    const userBadge = document.getElementById('userBadge');
 
     // Historique
     const toggleHistoryBtn = document.getElementById('toggleHistoryBtn');
@@ -25,10 +32,38 @@ document.addEventListener('DOMContentLoaded', () => {
     const historyList = document.getElementById('historyList');
     const clearHistoryBtn = document.getElementById('clearHistoryBtn');
 
-    // 🎯 URL Cloudflare Worker (ton backend existant)
     const API_URL = 'https://corporate-translator.bonjour7858.workers.dev';
 
-    // --- 1. Gestion des Tonalités ---
+    // --- Vérification du Statut VIP au chargement ---
+    function checkVipStatus() {
+        const isVip = localStorage.getItem('corp_translator_vip') === 'true';
+        if (isVip) {
+            userBadge.textContent = "VIP Pass 🌟";
+            userBadge.className = "text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30";
+            openVipModalBtn.innerHTML = `🌟 VIP Actif`;
+        }
+    }
+    checkVipStatus();
+
+    // Gestion Modal VIP
+    openVipModalBtn.addEventListener('click', () => vipModal.classList.remove('hidden'));
+    closeVipModalBtn.addEventListener('click', () => vipModal.classList.add('hidden'));
+
+    // Code VIP d'exemple (Tu peux changer ce code secret comme tu veux)
+    activateVipBtn.addEventListener('click', () => {
+        const code = vipCodeInput.value.trim();
+        if (code === 'VIP-BONJOUR-2026') {
+            localStorage.setItem('corp_translator_vip', 'true');
+            vipModal.classList.add('hidden');
+            checkVipStatus();
+            alert('Félicitations ! Votre pass VIP est désormais actif.');
+        } else {
+            vipErrorMsg.textContent = "Code invalide. Vérifiez votre reçu Leetchi.";
+            vipErrorMsg.classList.remove('hidden');
+        }
+    });
+
+    // --- Gestion Tonalité ---
     toneBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             toneBtns.forEach(b => {
@@ -41,7 +76,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- 2. Compteur de caractères & Reset ---
     inputText.addEventListener('input', () => {
         charCount.textContent = `${inputText.value.length}/500`;
     });
@@ -60,12 +94,11 @@ document.addEventListener('DOMContentLoaded', () => {
         copyBtn.disabled = true;
     }
 
-    // --- 3. Construction intelligente du message et envoi ---
+    // --- Traduction ---
     async function translateText() {
         const text = inputText.value.trim();
         if (!text) return;
 
-        // UI : Mode chargement
         submitBtn.disabled = true;
         submitBtnText.textContent = 'Optimisation...';
         placeholderText.classList.add('hidden');
@@ -74,7 +107,6 @@ document.addEventListener('DOMContentLoaded', () => {
         loader.classList.remove('hidden');
         copyBtn.disabled = true;
 
-        // Traduction des options en consignes claires pour le prompt
         let toneInstruction = "Rends ce message extrêmement professionnel, diplomatique et élégant.";
         if (currentTone === 'firm') {
             toneInstruction = "Rends ce message poli mais extrêmement ferme, direct et sans équivoque (style passif-agressif corporate).";
@@ -86,7 +118,6 @@ document.addEventListener('DOMContentLoaded', () => {
             ? "Réponds UNIQUEMENT en anglais (Corporate English professionnel)." 
             : "Réponds UNIQUEMENT en français.";
 
-        // On encapsule les consignes directement dans le texte envoyé au Worker
         const finalPrompt = `Consignes de style : ${toneInstruction} ${langInstruction}\n\nMessage brut à reformuler : "${text}"`;
 
         try {
@@ -104,8 +135,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 outputText.classList.remove('hidden');
                 outputActions.classList.remove('hidden');
                 copyBtn.disabled = false;
-
-                // Enregistrer dans l'historique local
                 saveToHistory(text, data.result);
             } else {
                 outputText.textContent = "Erreur : " + (data.error || "Impossible de traiter la demande.");
@@ -124,7 +153,6 @@ document.addEventListener('DOMContentLoaded', () => {
     submitBtn.addEventListener('click', translateText);
     regenBtn.addEventListener('click', translateText);
 
-    // --- 4. Copier dans le presse-papier ---
     copyBtn.addEventListener('click', () => {
         navigator.clipboard.writeText(outputText.textContent).then(() => {
             copyBtnText.textContent = "Copié !";
@@ -132,7 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- 5. Gestion de l'historique (LocalStorage) ---
+    // --- Historique ---
     toggleHistoryBtn.addEventListener('click', () => {
         historyDrawer.classList.remove('translate-x-full');
         renderHistory();
