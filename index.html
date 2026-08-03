@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Corporate Translator | bonjour7858</title>
-    <!-- Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -18,13 +17,13 @@
                             border: '#1f293a',
                             accent: '#3b82f6',
                             'accent-hover': '#60a5fa',
+                            vip: '#f59e0b' // Gold pour le VIP
                         }
                     }
                 }
             }
         }
     </script>
-    <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -32,7 +31,6 @@
         body { font-family: 'Inter', sans-serif; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         .fade-in { animation: fadeIn 0.3s ease-out forwards; }
     </style>
@@ -46,21 +44,19 @@
                 <div class="p-2 rounded-xl bg-brand-accent/10 border border-brand-accent/20">
                     <svg class="w-6 h-6 text-brand-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
                 </div>
-                <h1 class="text-xl font-bold text-white tracking-tight">
+                <h1 class="text-xl font-bold text-white tracking-tight flex items-center gap-2">
                     Corporate Translator
+                    <span id="userBadge" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-gray-800 text-gray-400 border border-brand-border">Free Tier</span>
                 </h1>
             </div>
             
-            <div class="flex items-center gap-3">
-                <span class="hidden sm:flex items-center gap-1.5 text-xs text-green-400 font-medium px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/20">
-                    <span class="relative flex h-2 w-2">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                    </span>
-                    API En Ligne
-                </span>
+            <div class="flex items-center gap-2 sm:gap-3">
+                <!-- Bouton Pass VIP Leetchi -->
+                <button id="openVipModalBtn" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-bold text-xs shadow-lg shadow-yellow-500/10 hover:brightness-110 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+                    Pass VIP Leetchi
+                </button>
 
-                <!-- Bouton Ouvrir Historique -->
                 <button id="toggleHistoryBtn" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-brand-border bg-brand-panel hover:bg-gray-800 text-xs font-medium text-gray-300 transition">
                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     Historique
@@ -72,7 +68,6 @@
     <!-- Main Content -->
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14">
         
-        <!-- Hero Section -->
         <div class="text-center mb-10 md:mb-14">
             <h2 class="text-4xl md:text-5xl font-extrabold text-white tracking-tight leading-tight">
                 Alignez votre discours sur les<br/>
@@ -107,12 +102,12 @@
         <!-- Translator Grid -->
         <div class="grid md:grid-cols-2 gap-6 lg:gap-8 items-start">
             
-            <!-- Entrée (Message Brut) -->
+            <!-- Entrée -->
             <div class="border border-brand-border bg-brand-panel rounded-2xl shadow-xl overflow-hidden">
                 <div class="px-5 py-3.5 border-b border-brand-border flex items-center justify-between bg-brand-dark/50">
                     <div class="flex items-center gap-2">
                         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                        <h3 class="text-sm font-semibold text-white">MESSAGE BRUT / FRANC</h3>
+                        <h3 class="text-sm font-semibold text-white"> MESSAGE BRUT / FRANC</h3>
                     </div>
                     <span id="charCount" class="text-xs font-mono text-gray-500">0/500</span>
                 </div>
@@ -128,7 +123,7 @@
                 </div>
             </div>
 
-            <!-- Sortie (Formulation Corporate) -->
+            <!-- Sortie -->
             <div class="border border-brand-border bg-brand-panel rounded-2xl shadow-xl overflow-hidden relative">
                 <div class="px-5 py-3.5 border-b border-brand-border flex items-center justify-between bg-brand-dark/50">
                     <div class="flex items-center gap-2">
@@ -142,22 +137,15 @@
                 </div>
                 
                 <div class="p-2 min-h-[260px] flex flex-col justify-between">
-                    <!-- Placeholder -->
                     <div id="placeholderText" class="my-auto text-center p-8 text-gray-600">
                         <p class="text-sm">Saisissez votre texte à gauche et cliquez sur **Optimiser**.</p>
                     </div>
-
-                    <!-- Loader (Shimmer) -->
                     <div id="loader" class="hidden my-auto p-4 space-y-3">
                         <div class="h-4 bg-gray-800 rounded animate-pulse w-3/4"></div>
                         <div class="h-4 bg-gray-800 rounded animate-pulse w-full"></div>
                         <div class="h-4 bg-gray-800 rounded animate-pulse w-5/6"></div>
                     </div>
-
-                    <!-- Output Text -->
                     <p id="outputText" class="hidden p-4 text-gray-100 text-base leading-relaxed fade-in"></p>
-
-                    <!-- Option Régénérer -->
                     <div id="outputActions" class="hidden border-t border-brand-border/50 pt-2 px-2 flex justify-end">
                         <button id="regenBtn" class="flex items-center gap-1 text-xs font-medium text-gray-400 hover:text-white p-1.5 rounded transition">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 003 12c0 2.21.896 4.21 2.344 5.344m2.656 2.228A8.001 8.001 0 0021 12c0-2.21-.896-4.21-2.344-5.344m-2.656-2.228A8.001 8.001 0 003 12a8 8 0 0113.166-4.732L19 7v5h-5"></path></svg>
@@ -169,7 +157,42 @@
         </div>
     </main>
 
-    <!-- Drawer Historique (Caché sur le côté droit) -->
+    <!-- MODAL PASS VIP / LEETCHI -->
+    <div id="vipModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-brand-panel border border-brand-border rounded-3xl max-w-md w-full p-6 shadow-2xl relative space-y-5">
+            <button id="closeVipModalBtn" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <div class="text-center space-y-2">
+                <div class="inline-flex p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 mb-1">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-white">Débloquez le Pass VIP</h3>
+                <p class="text-xs text-gray-400">Soutenez le projet via notre cagnotte Leetchi pour obtenir un accès illimité et des fonctionnalités exclusives.</p>
+            </div>
+
+            <div class="space-y-3 bg-brand-dark p-4 rounded-2xl border border-brand-border text-xs">
+                <p class="font-semibold text-gray-300">Comment obtenir son code VIP ?</p>
+                <ol class="list-decimal list-inside space-y-1 text-gray-400">
+                    <li>Participez sur la cagnotte Leetchi du créateur.</li>
+                    <li>Récupérez votre code secret d'activation (reçu par email ou message).</li>
+                    <li>Entrez votre code ci-dessous pour activer le badge VIP.</li>
+                </ol>
+                <a href="https://www.leetchi.com" target="_blank" class="block text-center py-2.5 mt-2 rounded-xl bg-amber-500 text-black font-bold hover:bg-amber-400 transition">Accéder à la cagnotte Leetchi ↗</a>
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-xs font-medium text-gray-400">Entrer votre code d'activation VIP :</label>
+                <div class="flex gap-2">
+                    <input type="text" id="vipCodeInput" placeholder="ex: VIP-XXXX-2026" class="flex-grow bg-brand-dark border border-brand-border rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                    <button id="activateVipBtn" class="px-4 py-2 bg-brand-accent hover:bg-brand-accent-hover text-white text-xs font-semibold rounded-xl transition">Activer</button>
+                </div>
+                <p id="vipErrorMsg" class="text-[10px] text-red-400 hidden"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Drawer Historique -->
     <aside id="historyDrawer" class="fixed top-0 right-0 h-full w-80 bg-brand-panel border-l border-brand-border shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col">
         <div class="p-4 border-b border-brand-border flex items-center justify-between">
             <h3 class="font-bold text-sm text-white flex items-center gap-2">
@@ -188,11 +211,11 @@
         </div>
     </aside>
 
-    <!-- Footer Clean -->
+    <!-- Footer -->
     <footer class="border-t border-brand-border bg-brand-panel mt-12 py-6">
         <div class="max-w-7xl mx-auto px-4 text-center text-xs text-gray-500 space-y-1">
             <p>© bonjour7858, all rights reserved.</p>
-            <p class="text-gray-600">Corporate Translator • Propulsé par Groq & Cloudflare Workers • Zero Data Retention</p>
+            <p class="text-gray-600">Corporate Translator • Propulsé par Groq & Cloudflare Workers</p>
         </div>
     </footer>
 
