@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const copyBtnText = document.getElementById('copyBtnText');
 
     // 🔴 REMPLACE CETTE URL par ton lien Cloudflare exact (en .pages.dev)
-    const API_URL = 'https://corporate-translator.bonjour7858.workers.dev/';
+    const API_URL = 'https://corporate-translator.bonjour7858.pages.dev/';
 
     // Compteur de caractères
     inputText.addEventListener('input', () => {
