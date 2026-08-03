@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             // Remplace ci-dessous par l'URL de ton Worker Cloudflare créé dans la console
-            const WORKER_URL = 'https://MON-WORKER.workers.dev';
+            const WORKER_URL = 'https://corporate-translator.bonjour7858.workers.dev/';
 
             const response = await fetch(WORKER_URL, {
                 method: 'POST',
