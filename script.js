@@ -10,19 +10,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const copyBtn = document.getElementById('copyBtn');
     const copyBtnText = document.getElementById('copyBtnText');
 
+    // 🔴 REMPLACE CETTE URL par ton lien Cloudflare exact (en .pages.dev)
+    const API_URL = 'https://corporate-translator.pages.dev/api/translate';
+
     // Compteur de caractères
     inputText.addEventListener('input', () => {
         charCount.textContent = `${inputText.value.length}/500`;
     });
 
-    // Bouton Effacer
+    // Effacer le champ
     clearBtn.addEventListener('click', () => {
         inputText.value = '';
         charCount.textContent = '0/500';
         inputText.focus();
     });
 
-    // Bouton Soumettre
+    // Soumission du formulaire
     submitBtn.addEventListener('click', async () => {
         const text = inputText.value.trim();
         if (!text) return;
@@ -37,8 +40,8 @@ document.addEventListener('DOMContentLoaded', () => {
         copyBtn.disabled = true;
 
         try {
-            // Appel vers la Cloudflare Function via l'URL relative /api/translate
-            const response = await fetch('/api/translate', {
+            // On appelle l'URL absolue de Cloudflare au lieu de la route relative
+            const response = await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ text })
@@ -69,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Bouton Copier
+    // Copier le résultat
     copyBtn.addEventListener('click', () => {
         navigator.clipboard.writeText(outputText.textContent).then(() => {
             copyBtnText.textContent = "Copié !";
