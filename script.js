@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const outputLang = document.getElementById('outputLang');
     let currentTone = 'standard';
 
-    // Modal VIP
+    // Modal VIP & Système de compte local
     const openVipModalBtn = document.getElementById('openVipModalBtn');
     const closeVipModalBtn = document.getElementById('closeVipModalBtn');
     const vipModal = document.getElementById('vipModal');
@@ -34,36 +34,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const API_URL = 'https://corporate-translator.bonjour7858.workers.dev';
 
-    // --- Vérification du Statut VIP au chargement ---
+    // --- SYSTÈMEME DE COMPTE : Vérification du Statut VIP local ---
     function checkVipStatus() {
         const isVip = localStorage.getItem('corp_translator_vip') === 'true';
         if (isVip) {
-            userBadge.textContent = "VIP Pass 🌟";
+            userBadge.textContent = "Compte VIP 🌟";
             userBadge.className = "text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30";
             openVipModalBtn.innerHTML = `🌟 VIP Actif`;
         }
     }
     checkVipStatus();
 
-    // Gestion Modal VIP
-    openVipModalBtn.addEventListener('click', () => vipModal.classList.remove('hidden'));
-    closeVipModalBtn.addEventListener('click', () => vipModal.classList.add('hidden'));
+    // Ouverture / Fermeture sécurisée de la modale VIP
+    openVipModalBtn.addEventListener('click', () => {
+        vipModal.classList.remove('hidden');
+    });
 
-    // Code VIP d'exemple (Tu peux changer ce code secret comme tu veux)
+    closeVipModalBtn.addEventListener('click', () => {
+        vipModal.classList.add('hidden');
+    });
+
+    // Fermeture en cliquant en dehors de la modale
+    vipModal.addEventListener('click', (e) => {
+        if (e.target === vipModal) {
+            vipModal.classList.add('hidden');
+        }
+    });
+
+    // Activation du code secret VIP (fictif pour tester : VIP-BONJOUR-2026)
     activateVipBtn.addEventListener('click', () => {
         const code = vipCodeInput.value.trim();
         if (code === 'VIP-BONJOUR-2026') {
             localStorage.setItem('corp_translator_vip', 'true');
             vipModal.classList.add('hidden');
             checkVipStatus();
-            alert('Félicitations ! Votre pass VIP est désormais actif.');
+            alert('Compte mis à niveau ! Bienvenue dans l\'espace VIP.');
         } else {
-            vipErrorMsg.textContent = "Code invalide. Vérifiez votre reçu Leetchi.";
+            vipErrorMsg.textContent = "Code d'activation invalide.";
             vipErrorMsg.classList.remove('hidden');
         }
     });
 
-    // --- Gestion Tonalité ---
+    // --- Gestion des Tonalités ---
     toneBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             toneBtns.forEach(b => {
