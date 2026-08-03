@@ -1,79 +1,88 @@
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
-};
+document.addEventListener('DOMContentLoaded', () => {
+    const inputText = document.getElementById('inputText');
+    const charCount = document.getElementById('charCount');
+    const outputText = document.getElementById('outputText');
+    const placeholderText = document.getElementById('placeholderText');
+    const loader = document.getElementById('loader');
+    const submitBtn = document.getElementById('submitBtn');
+    const submitBtnText = document.getElementById('submitBtnText');
+    const clearBtn = document.getElementById('clearBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const copyBtnText = document.getElementById('copyBtnText');
 
-// Intercepte la requête de vérification CORS du navigateur
-export async function onRequestOptions() {
-  return new Response(null, {
-    status: 204,
-    headers: corsHeaders,
-  });
-}
+    // 🎯 URL complète ciblant le bon endpoint de ton Worker
+    const API_URL = 'https://corporate-translator.bonjour7858.workers.dev/api/translate';
 
-// Traite la vraie requête de traduction
-export async function onRequestPost(context) {
-  try {
-    const { request, env } = context;
-    const { text } = await request.json();
-
-    if (!text || text.trim().length === 0 || text.length > 500) {
-      return new Response(
-        JSON.stringify({ error: "Texte invalide ou trop long (500 car. max)." }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
-      );
-    }
-
-    const GROQ_API_KEY = env.GROQ_API_KEY;
-    if (!GROQ_API_KEY) {
-      return new Response(
-        JSON.stringify({ error: "Clé GROQ_API_KEY non configurée sur Cloudflare." }),
-        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
-      );
-    }
-
-    const systemPrompt = `Tu es un consultant exécutif de haut niveau spécialisé dans la communication d'entreprise. 
-Ta tâche est de reformuler le message brut, franc ou familier fourni par l'utilisateur pour le rendre extrêmement professionnel, diplomatique, élégant et adapté aux standards exécutifs (pour un email d'entreprise ou Slack).
-Règles strictes :
-1. Réponds UNIQUEMENT avec la traduction/reformulation en français.
-2. Ne mets aucun commentaire, aucun titre, aucune note d'introduction ni de conclusion.`;
-
-    const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${GROQ_API_KEY}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: text }
-        ],
-        temperature: 0.6,
-        max_tokens: 300
-      })
+    // Compteur de caractères
+    inputText.addEventListener('input', () => {
+        charCount.textContent = `${inputText.value.length}/500`;
     });
 
-    const groqData = await groqResponse.json();
+    // Effacer le champ texte
+    clearBtn.addEventListener('click', () => {
+        inputText.value = '';
+        charCount.textContent = '0/500';
+        inputText.focus();
+    });
 
-    if (!groqResponse.ok) {
-      return new Response(
-        JSON.stringify({ error: groqData.error?.message || "Erreur Groq" }),
-        { status: groqResponse.status, headers: { "Content-Type": "application/json", ...corsHeaders } }
-      );
-    }
+    // Soumission du formulaire
+    submitBtn.addEventListener('click', async () => {
+        const text = inputText.value.trim();
+        if (!text) return;
 
-    return new Response(
-      JSON.stringify({ result: groqData.choices[0]?.message?.content?.trim() }),
-      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
-    );
+        // Interface utilisateur : état de chargement
+        submitBtn.disabled = true;
+        submitBtnText.textContent = 'Traitement...';
+        placeholderText.classList.add('hidden');
+        outputText.classList.add('hidden');
+        loader.classList.remove('hidden');
+        loader.classList.add('flex');
+        copyBtn.disabled = true;
 
-  } catch (err) {
-    return new Response(
-      JSON.stringify({ error: "Erreur serveur : " + err.message }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
-    );
-  }
-}
+        try {
+            // Requête POST vers l'API Cloudflare
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json' 
+                },
+                body: JSON.stringify({ text })
+            });
+
+            const data = await response.json();
+
+            loader.classList.remove('flex');
+            loader.classList.add('hidden');
+
+            if (response.ok && data.result) {
+                outputText.textContent = data.result;
+                outputText.classList.remove('hidden');
+                outputText.classList.add('fade-in-text');
+                copyBtn.disabled = false;
+            } else {
+                outputText.textContent = "Erreur : " + (data.error || "Impossible de traiter la demande.");
+                outputText.classList.remove('hidden');
+            }
+        } catch (err) {
+            loader.classList.remove('flex');
+            loader.classList.add('hidden');
+            outputText.textContent = "Erreur de connexion au serveur.";
+            outputText.classList.remove('hidden');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtnText.textContent = 'Optimiser';
+        }
+    });
+
+    // Copier la réponse dans le presse-papier
+    copyBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(outputText.textContent).then(() => {
+            copyBtnText.textContent = "Copié !";
+            copyBtn.classList.add('bg-blue-600', 'text-white');
+            setTimeout(() => {
+                copyBtnText.textContent = "Copier";
+                copyBtn.classList.remove('bg-blue-600', 'text-white');
+            }, 2000);
+        });
+    });
+});
