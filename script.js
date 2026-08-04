@@ -14,7 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const readTime = document.getElementById('readTime');
     const inputTitle = document.getElementById('inputTitle');
     
-    // Contrôles de modes
     const modeTabs = document.querySelectorAll('.mode-tab');
     const translateBar = document.getElementById('translateBar');
     const emailBar = document.getElementById('emailBar');
@@ -22,11 +21,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const scenarioBtns = document.querySelectorAll('.scenario-btn');
     const outputLang = document.getElementById('outputLang');
 
-    let currentMode = 'translate'; // 'translate' ou 'email'
+    let currentMode = 'translate';
     let currentTone = 'standard';
     let currentScenario = 'invoice';
+    let soundEnabled = false;
 
-    // Modales & Boutons VIP
+    const toggleSoundBtn = document.getElementById('toggleSoundBtn');
+    const rootMessage = document.getElementById('rootMessage');
+    const rootEasterEggBtn = document.getElementById('rootEasterEggBtn');
+    const closeRootBubble = document.getElementById('closeRootBubble');
+    const rootBubbleBox = document.getElementById('rootBubbleBox');
+
     const openVipModalBtn = document.getElementById('openVipModalBtn');
     const closeVipModalBtn = document.getElementById('closeVipModalBtn');
     const vipModal = document.getElementById('vipModal');
@@ -43,29 +48,53 @@ document.addEventListener('DOMContentLoaded', () => {
     const profileRole = document.getElementById('profileRole');
     const profileCompany = document.getElementById('profileCompany');
 
-    // Historique
     const toggleHistoryBtn = document.getElementById('toggleHistoryBtn');
     const closeHistoryBtn = document.getElementById('closeHistoryBtn');
     const historyDrawer = document.getElementById('historyDrawer');
     const historyList = document.getElementById('historyList');
     const clearHistoryBtn = document.getElementById('clearHistoryBtn');
 
-    // Easter Egg Bullshit
-    const bullshitText = document.getElementById('bullshitText');
-    const regenBullshit = document.getElementById('regenBullshit');
-    const bullshitPhrases = [
-        "\"Il faut auditer nos synergies agiles sur ce livrable.\"",
-        "\"On va adresser ce point en mode brainstorming transverse.\"",
-        "\"Il est urgent de ne rien faire en attendant le go-chief.\"",
-        "\"Faisons un point de alignment to be on the same page.\"",
-        "\"C'est un quick win à fort ROI stratégique.\""
-    ];
-    regenBullshit.addEventListener('click', () => {
-        const rand = bullshitPhrases[Math.floor(Math.random() * bullshitPhrases.length)];
-        bullshitText.textContent = rand;
+    // Gestion du Son Root (Text-to-Speech intégré)
+    toggleSoundBtn.addEventListener('click', () => {
+        soundEnabled = !soundEnabled;
+        if (soundEnabled) {
+            toggleSoundBtn.innerHTML = `🔊 <span class="hidden sm:inline">Son Root (Actif)</span>`;
+            toggleSoundBtn.classList.add('border-amber-500', 'text-amber-400');
+            speakRoot("Mode sonore activé par Root. Je surveille ton clavier !");
+        } else {
+            toggleSoundBtn.innerHTML = `🔇 <span class="hidden sm:inline">Son Root</span>`;
+            toggleSoundBtn.classList.remove('border-amber-500', 'text-amber-400');
+        }
     });
 
-    const API_URL = 'https://corporate-translator.bonjour7858.workers.dev';
+    function speakRoot(text) {
+        if (!soundEnabled || !('speechSynthesis' in window)) return;
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'fr-FR';
+        utterance.rate = 1.1;
+        window.speechSynthesis.speak(utterance);
+    }
+
+    // Easter Egg Root
+    const rootQuotes = [
+        "J'ai analysé ton code. Il manque un test unitaire, mais t'assures !",
+        "Attention, niveau de toxicité corporate élevé dans la pièce !",
+        "Root est fier de toi. Continue de coder !",
+        "Besoin d'un café ou d'une synergie agile ?"
+    ];
+
+    rootEasterEggBtn.addEventListener('click', () => {
+        const randomQuote = rootQuotes[Math.floor(Math.random() * rootQuotes.length)];
+        rootMessage.textContent = randomQuote;
+        rootBubbleBox.classList.remove('hidden');
+        speakRoot(randomQuote);
+        showToast("🧡 Root est réveillé !");
+    });
+
+    closeRootBubble.addEventListener('click', () => {
+        rootBubbleBox.classList.add('hidden');
+    });
 
     function showToast(message, type = 'success') {
         const container = document.getElementById('toastContainer');
@@ -81,7 +110,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 2500);
     }
 
-    // --- Gestion des Modes (Traducteur vs Créateur de Mail) ---
     modeTabs.forEach(tab => {
         tab.addEventListener('click', () => {
             modeTabs.forEach(t => {
@@ -105,19 +133,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 emailBar.classList.remove('hidden');
                 emailBar.classList.add('flex');
                 inputTitle.textContent = "CONTEXTE OU NOTES BRUTES";
-                inputText.placeholder = "Ex: Client X qui ne paye pas depuis 2 mois / Réunion inutile de 2h...";
+                inputText.placeholder = "Ex: Projet en retard à cause de l'équipe X...";
             }
             resetOutput();
         });
     });
 
-    // --- Gestion VIP & Profil ---
     function checkVipStatus() {
         const isVip = localStorage.getItem('corp_translator_vip') === 'true';
         if (isVip) {
-            userBadge.textContent = "Compte VIP 🌟";
+            userBadge.textContent = "Compte VIP Root 🌟";
             userBadge.className = "text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30";
-            openVipModalBtn.innerHTML = `🌟 VIP Actif`;
+            openVipModalBtn.innerHTML = `🌟 VIP Root Actif`;
             openVipProfileBtn.classList.remove('hidden');
             openVipProfileBtn.classList.add('flex');
             
@@ -130,34 +157,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     openVipModalBtn.addEventListener('click', () => vipModal.classList.remove('hidden'));
     closeVipModalBtn.addEventListener('click', () => vipModal.classList.add('hidden'));
-    vipModal.addEventListener('click', (e) => { if (e.target === vipModal) vipModal.classList.add('hidden'); });
-
     openVipProfileBtn.addEventListener('click', () => profileModal.classList.remove('hidden'));
     closeProfileModalBtn.addEventListener('click', () => profileModal.classList.add('hidden'));
-    profileModal.addEventListener('click', (e) => { if (e.target === profileModal) profileModal.classList.add('hidden'); });
 
     saveProfileBtn.addEventListener('click', () => {
         localStorage.setItem('corp_profile_name', profileName.value.trim());
         localStorage.setItem('corp_profile_role', profileRole.value.trim());
         localStorage.setItem('corp_profile_company', profileCompany.value.trim());
         profileModal.classList.add('hidden');
-        showToast('Profil VIP enregistré avec succès !');
+        showToast('Profil VIP enregistré !');
     });
 
     activateVipBtn.addEventListener('click', () => {
         const code = vipCodeInput.value.trim();
-        if (code === 'VIP-BONJOUR-2026') {
+        if (code === 'VIP-ROOT-2026') {
             localStorage.setItem('corp_translator_vip', 'true');
             vipModal.classList.add('hidden');
             checkVipStatus();
-            showToast('Félicitations ! Compte VIP activé 🌟');
+            showToast('Félicitations ! Pass VIP Root activé 🌟');
+            speakRoot("Pass VIP Root activé avec succès.");
         } else {
-            vipErrorMsg.textContent = "Code d'activation invalide.";
             vipErrorMsg.classList.remove('hidden');
         }
     });
 
-    // --- Gestion des Tonalités & Scénarios ---
     toneBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             toneBtns.forEach(b => {
@@ -209,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (i < text.length) {
                 element.textContent += text.charAt(i);
                 i++;
-                setTimeout(typing, 5);
+                setTimeout(typing, 4);
             } else if (callback) {
                 callback();
             }
@@ -217,7 +240,6 @@ document.addEventListener('DOMContentLoaded', () => {
         typing();
     }
 
-    // --- Génération Intelligente (Traduction ou Mail Pro) ---
     async function processGeneration() {
         const text = inputText.value.trim();
         if (!text) return;
@@ -236,39 +258,22 @@ document.addEventListener('DOMContentLoaded', () => {
             : "Réponds UNIQUEMENT en français.";
 
         let finalPrompt = "";
-
         if (currentMode === 'translate') {
-            let toneInstruction = "Rends ce message extrêmement professionnel, diplomatique et élégant.";
-            if (currentTone === 'firm') toneInstruction = "Rends ce message poli mais extrêmement ferme, direct et sans équivoque (style passif-agressif corporate).";
-            else if (currentTone === 'ceo') toneInstruction = "Rends ce message ultra-concis, percutant, orienté stratégie et ROI (style CEO).";
-            else if (currentTone === 'sarcastic') toneInstruction = "Rends ce message faussement flatteur, hautement hypocrite, bourré de fausse bienveillance et dégoulinant de fausse gratitude.";
-
-            finalPrompt = `Consignes de style : ${toneInstruction} ${langInstruction}\n\nMessage brut à reformuler : "${text}"`;
+            let toneInstruction = "Rends ce message extrêmement professionnel et diplomatique.";
+            if (currentTone === 'firm') toneInstruction = "Rends ce message poli mais ferme et direct.";
+            else if (currentTone === 'ceo') toneInstruction = "Rends ce message ultra-concis et orienté ROI.";
+            else if (currentTone === 'sarcastic') toneInstruction = "Rends ce message faussement flatteur et hypocrite.";
+            finalPrompt = `Consignes : ${toneInstruction} ${langInstruction}\n\nMessage : "${text}"`;
         } else {
-            // Créateur de mail pro - Scénarios spécifiques
-            let scenarioInstruction = "";
-            if (currentScenario === 'invoice') {
-                scenarioInstruction = "Rédige un e-mail professionnel de relance de facture impayée ou de devis en attente. Ton progressif, ferme mais courtois, rappelant les engagements pris sans agressivité.";
-            } else if (currentScenario === 'meeting') {
-                scenarioInstruction = "Rédige un e-mail pour décliner poliment une invitation à une réunion en expliquant la nécessité de prioriser les tâches de fond (focus time), ou propose un point asynchrone par message.";
-            } else if (currentScenario === 'pressure') {
-                scenarioInstruction = "Rédige un e-mail pour répondre à une demande urgente avec un délai irréalisable. Explique sans dire non qu'un arbitrage des priorités est nécessaire pour garantir la qualité.";
-            } else if (currentScenario === 'disagreement') {
-                scenarioInstruction = "Rédige un compte-rendu ou un e-mail de cadrage post-réunion formalisant noir sur blanc un désaccord technique ou stratégique de manière irréprochable pour se couvrir juridiquement/professionnellement.";
-            }
-
-            finalPrompt = `Objectif e-mail pro : ${scenarioInstruction} ${langInstruction}\n\nContexte / Notes de l'utilisateur : "${text}"`;
+            let scenarioInstruction = currentScenario === 'blame' 
+                ? "Rédige un e-mail officiel de redirection de responsabilité (dédouanement) prouvant par A+B que le problème ne vient pas de toi."
+                : currentScenario === 'raise' 
+                ? "Rédige un argumentaire d'entretien annuel / demande d'augmentation axé sur la valeur nette."
+                : "Rédige un e-mail professionnel adapté au scénario.";
+            finalPrompt = `Objectif : ${scenarioInstruction} ${langInstruction}\n\nContexte : "${text}"`;
         }
 
-        // Injection signature VIP si active
-        let profileContext = "";
-        const pName = localStorage.getItem('corp_profile_name');
-        const pRole = localStorage.getItem('corp_profile_role');
-        const pCompany = localStorage.getItem('corp_profile_company');
-        if (localStorage.getItem('corp_translator_vip') === 'true' && (pName || pRole || pCompany)) {
-            profileContext = ` Signature à inclure à la fin de l'e-mail : Signé par ${pName || ''}, ${pRole || ''} chez ${pCompany || ''}.`;
-        }
-        finalPrompt += profileContext;
+        const API_URL = 'https://corporate-translator.bonjour7858.workers.dev';
 
         try {
             const response = await fetch(API_URL, {
@@ -283,22 +288,22 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok && data.result) {
                 outputActions.classList.remove('hidden');
                 copyBtn.disabled = false;
-                
-                const words = data.result.split(/\s+/).length;
-                const seconds = Math.max(1, Math.ceil(words / 3.5));
-                readTime.textContent = `⏱️ ~${seconds}s de lecture`;
+                readTime.textContent = `⏱️ Optimisé par Root`;
                 readTime.classList.remove('hidden');
 
                 typeWriterEffect(data.result, outputText, () => {
                     saveToHistory(text, data.result);
+                    if (soundEnabled) {
+                        speakRoot("Traduction validée par Root !");
+                    }
                 });
             } else {
-                outputText.textContent = "Erreur : " + (data.error || "Impossible de traiter la demande.");
+                outputText.textContent = "Erreur : " + (data.error || "Problème serveur.");
                 outputText.classList.remove('hidden');
             }
         } catch (err) {
             loader.classList.add('hidden');
-            outputText.textContent = "Erreur de connexion avec le serveur.";
+            outputText.textContent = "Erreur de connexion.";
             outputText.classList.remove('hidden');
         } finally {
             submitBtn.disabled = false;
@@ -311,13 +316,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     copyBtn.addEventListener('click', () => {
         navigator.clipboard.writeText(outputText.textContent).then(() => {
-            showToast('Texte copié dans le presse-papier !');
+            showToast('Copié dans le presse-papier !');
             copyBtnText.textContent = "Copié !";
             setTimeout(() => { copyBtnText.textContent = "Copier"; }, 2000);
         });
     });
 
-    // --- Historique ---
     toggleHistoryBtn.addEventListener('click', () => {
         historyDrawer.classList.remove('translate-x-full');
         renderHistory();
@@ -337,14 +341,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderHistory() {
         let history = JSON.parse(localStorage.getItem('corp_translator_history') || '[]');
         if (history.length === 0) {
-            historyList.innerHTML = `<p class="text-gray-600 text-center py-8">Aucun historique pour le moment.</p>`;
+            historyList.innerHTML = `<p class="text-gray-600 text-center py-8">Aucun historique.</p>`;
             return;
         }
-
         historyList.innerHTML = history.map(item => `
             <div class="p-3 bg-brand-dark rounded-xl border border-brand-border space-y-1.5 cursor-pointer hover:border-gray-600 transition" onclick="loadFromHistory('${encodeURIComponent(item.original)}', '${encodeURIComponent(item.result)}')">
                 <div class="flex justify-between text-[10px] text-gray-500 font-mono">
-                    <span>Sujet: "${item.original.substring(0, 20)}..."</span>
+                    <span>"${item.original.substring(0, 15)}..."</span>
                     <span>${item.date}</span>
                 </div>
                 <p class="text-gray-200 text-xs font-medium truncate">${item.result}</p>
