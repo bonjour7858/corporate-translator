@@ -12,10 +12,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const outputActions = document.getElementById('outputActions');
     const regenBtn = document.getElementById('regenBtn');
     const readTime = document.getElementById('readTime');
+    const inputTitle = document.getElementById('inputTitle');
     
+    // Contrôles de modes
+    const modeTabs = document.querySelectorAll('.mode-tab');
+    const translateBar = document.getElementById('translateBar');
+    const emailBar = document.getElementById('emailBar');
     const toneBtns = document.querySelectorAll('.tone-btn');
+    const scenarioBtns = document.querySelectorAll('.scenario-btn');
     const outputLang = document.getElementById('outputLang');
+
+    let currentMode = 'translate'; // 'translate' ou 'email'
     let currentTone = 'standard';
+    let currentScenario = 'invoice';
 
     // Modales & Boutons VIP
     const openVipModalBtn = document.getElementById('openVipModalBtn');
@@ -58,7 +67,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const API_URL = 'https://corporate-translator.bonjour7858.workers.dev';
 
-    // Système de Toast
     function showToast(message, type = 'success') {
         const container = document.getElementById('toastContainer');
         const toast = document.createElement('div');
@@ -73,6 +81,36 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 2500);
     }
 
+    // --- Gestion des Modes (Traducteur vs Créateur de Mail) ---
+    modeTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            modeTabs.forEach(t => {
+                t.classList.remove('bg-brand-accent', 'text-white');
+                t.classList.add('text-gray-400');
+            });
+            tab.classList.add('bg-brand-accent', 'text-white');
+            tab.classList.remove('text-gray-400');
+            currentMode = tab.dataset.mode;
+
+            if (currentMode === 'translate') {
+                translateBar.classList.remove('hidden');
+                translateBar.classList.add('flex');
+                emailBar.classList.add('hidden');
+                emailBar.classList.remove('flex');
+                inputTitle.textContent = "MESSAGE BRUT / FRANC";
+                inputText.placeholder = "Écrivez votre message sans filtre ici...";
+            } else {
+                translateBar.classList.add('hidden');
+                translateBar.classList.remove('flex');
+                emailBar.classList.remove('hidden');
+                emailBar.classList.add('flex');
+                inputTitle.textContent = "CONTEXTE OU NOTES BRUTES";
+                inputText.placeholder = "Ex: Client X qui ne paye pas depuis 2 mois / Réunion inutile de 2h...";
+            }
+            resetOutput();
+        });
+    });
+
     // --- Gestion VIP & Profil ---
     function checkVipStatus() {
         const isVip = localStorage.getItem('corp_translator_vip') === 'true';
@@ -83,7 +121,6 @@ document.addEventListener('DOMContentLoaded', () => {
             openVipProfileBtn.classList.remove('hidden');
             openVipProfileBtn.classList.add('flex');
             
-            // Charger les infos du profil
             profileName.value = localStorage.getItem('corp_profile_name') || '';
             profileRole.value = localStorage.getItem('corp_profile_role') || '';
             profileCompany.value = localStorage.getItem('corp_profile_company') || '';
@@ -120,7 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- Gestion des Tonalités ---
+    // --- Gestion des Tonalités & Scénarios ---
     toneBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             toneBtns.forEach(b => {
@@ -130,6 +167,18 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.classList.add('bg-brand-accent', 'text-white');
             btn.classList.remove('text-gray-400');
             currentTone = btn.dataset.tone;
+        });
+    });
+
+    scenarioBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            scenarioBtns.forEach(b => {
+                b.classList.remove('bg-amber-500', 'text-black', 'font-semibold');
+                b.classList.add('text-gray-400');
+            });
+            btn.classList.add('bg-amber-500', 'text-black', 'font-semibold');
+            btn.classList.remove('text-gray-400');
+            currentScenario = btn.dataset.scenario;
         });
     });
 
@@ -152,7 +201,6 @@ document.addEventListener('DOMContentLoaded', () => {
         readTime.classList.add('hidden');
     }
 
-    // Effet machine à écrire
     function typeWriterEffect(text, element, callback) {
         element.textContent = '';
         element.classList.remove('hidden');
@@ -161,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (i < text.length) {
                 element.textContent += text.charAt(i);
                 i++;
-                setTimeout(typing, 10);
+                setTimeout(typing, 5);
             } else if (callback) {
                 callback();
             }
@@ -169,13 +217,13 @@ document.addEventListener('DOMContentLoaded', () => {
         typing();
     }
 
-    // --- Traduction & Intégration du profil VIP ---
-    async function translateText() {
+    // --- Génération Intelligente (Traduction ou Mail Pro) ---
+    async function processGeneration() {
         const text = inputText.value.trim();
         if (!text) return;
 
         submitBtn.disabled = true;
-        submitBtnText.textContent = 'Optimisation...';
+        submitBtnText.textContent = 'Génération...';
         placeholderText.classList.add('hidden');
         outputText.classList.add('hidden');
         outputActions.classList.add('hidden');
@@ -183,29 +231,44 @@ document.addEventListener('DOMContentLoaded', () => {
         copyBtn.disabled = true;
         readTime.classList.add('hidden');
 
-        let toneInstruction = "Rends ce message extrêmement professionnel, diplomatique et élégant.";
-        if (currentTone === 'firm') {
-            toneInstruction = "Rends ce message poli mais extrêmement ferme, direct et sans équivoque (style passif-agressif corporate).";
-        } else if (currentTone === 'ceo') {
-            toneInstruction = "Rends ce message ultra-concis, percutant, orienté stratégie et ROI (style CEO).";
-        } else if (currentTone === 'sarcastic') {
-            toneInstruction = "Rends ce message faussement flatteur, hautement hypocrite, bourré de fausse bienveillance et dégoulinant de fausse gratitude.";
-        }
-
         const langInstruction = outputLang.value === 'en' 
             ? "Réponds UNIQUEMENT en anglais (Corporate English professionnel)." 
             : "Réponds UNIQUEMENT en français.";
 
-        // Injection du profil VIP si configuré
+        let finalPrompt = "";
+
+        if (currentMode === 'translate') {
+            let toneInstruction = "Rends ce message extrêmement professionnel, diplomatique et élégant.";
+            if (currentTone === 'firm') toneInstruction = "Rends ce message poli mais extrêmement ferme, direct et sans équivoque (style passif-agressif corporate).";
+            else if (currentTone === 'ceo') toneInstruction = "Rends ce message ultra-concis, percutant, orienté stratégie et ROI (style CEO).";
+            else if (currentTone === 'sarcastic') toneInstruction = "Rends ce message faussement flatteur, hautement hypocrite, bourré de fausse bienveillance et dégoulinant de fausse gratitude.";
+
+            finalPrompt = `Consignes de style : ${toneInstruction} ${langInstruction}\n\nMessage brut à reformuler : "${text}"`;
+        } else {
+            // Créateur de mail pro - Scénarios spécifiques
+            let scenarioInstruction = "";
+            if (currentScenario === 'invoice') {
+                scenarioInstruction = "Rédige un e-mail professionnel de relance de facture impayée ou de devis en attente. Ton progressif, ferme mais courtois, rappelant les engagements pris sans agressivité.";
+            } else if (currentScenario === 'meeting') {
+                scenarioInstruction = "Rédige un e-mail pour décliner poliment une invitation à une réunion en expliquant la nécessité de prioriser les tâches de fond (focus time), ou propose un point asynchrone par message.";
+            } else if (currentScenario === 'pressure') {
+                scenarioInstruction = "Rédige un e-mail pour répondre à une demande urgente avec un délai irréalisable. Explique sans dire non qu'un arbitrage des priorités est nécessaire pour garantir la qualité.";
+            } else if (currentScenario === 'disagreement') {
+                scenarioInstruction = "Rédige un compte-rendu ou un e-mail de cadrage post-réunion formalisant noir sur blanc un désaccord technique ou stratégique de manière irréprochable pour se couvrir juridiquement/professionnellement.";
+            }
+
+            finalPrompt = `Objectif e-mail pro : ${scenarioInstruction} ${langInstruction}\n\nContexte / Notes de l'utilisateur : "${text}"`;
+        }
+
+        // Injection signature VIP si active
         let profileContext = "";
         const pName = localStorage.getItem('corp_profile_name');
         const pRole = localStorage.getItem('corp_profile_role');
         const pCompany = localStorage.getItem('corp_profile_company');
         if (localStorage.getItem('corp_translator_vip') === 'true' && (pName || pRole || pCompany)) {
-            profileContext = ` Signature à inclure à la fin : Signé par ${pName || ''}, ${pRole || ''} chez ${pCompany || ''}.`;
+            profileContext = ` Signature à inclure à la fin de l'e-mail : Signé par ${pName || ''}, ${pRole || ''} chez ${pCompany || ''}.`;
         }
-
-        const finalPrompt = `Consignes de style : ${toneInstruction} ${langInstruction}${profileContext}\n\nMessage brut à reformuler : "${text}"`;
+        finalPrompt += profileContext;
 
         try {
             const response = await fetch(API_URL, {
@@ -221,7 +284,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 outputActions.classList.remove('hidden');
                 copyBtn.disabled = false;
                 
-                // Calcul du temps de lecture (~200 mots par minute)
                 const words = data.result.split(/\s+/).length;
                 const seconds = Math.max(1, Math.ceil(words / 3.5));
                 readTime.textContent = `⏱️ ~${seconds}s de lecture`;
@@ -244,8 +306,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    submitBtn.addEventListener('click', translateText);
-    regenBtn.addEventListener('click', translateText);
+    submitBtn.addEventListener('click', processGeneration);
+    regenBtn.addEventListener('click', processGeneration);
 
     copyBtn.addEventListener('click', () => {
         navigator.clipboard.writeText(outputText.textContent).then(() => {
@@ -282,10 +344,10 @@ document.addEventListener('DOMContentLoaded', () => {
         historyList.innerHTML = history.map(item => `
             <div class="p-3 bg-brand-dark rounded-xl border border-brand-border space-y-1.5 cursor-pointer hover:border-gray-600 transition" onclick="loadFromHistory('${encodeURIComponent(item.original)}', '${encodeURIComponent(item.result)}')">
                 <div class="flex justify-between text-[10px] text-gray-500 font-mono">
-                    <span>Brut: "${item.original.substring(0, 20)}..."</span>
+                    <span>Sujet: "${item.original.substring(0, 20)}..."</span>
                     <span>${item.date}</span>
                 </div>
-                <p class="text-gray-200 text-xs font-medium">${item.result}</p>
+                <p class="text-gray-200 text-xs font-medium truncate">${item.result}</p>
             </div>
         `).join('');
     }
