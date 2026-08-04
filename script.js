@@ -11,12 +11,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const copyBtnText = document.getElementById('copyBtnText');
     const outputActions = document.getElementById('outputActions');
     const regenBtn = document.getElementById('regenBtn');
+    const readTime = document.getElementById('readTime');
     
     const toneBtns = document.querySelectorAll('.tone-btn');
     const outputLang = document.getElementById('outputLang');
     let currentTone = 'standard';
 
-    // Modal VIP & Système de compte local
+    // Modales & Boutons VIP
     const openVipModalBtn = document.getElementById('openVipModalBtn');
     const closeVipModalBtn = document.getElementById('closeVipModalBtn');
     const vipModal = document.getElementById('vipModal');
@@ -24,6 +25,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const vipCodeInput = document.getElementById('vipCodeInput');
     const vipErrorMsg = document.getElementById('vipErrorMsg');
     const userBadge = document.getElementById('userBadge');
+    
+    const openVipProfileBtn = document.getElementById('openVipProfileBtn');
+    const profileModal = document.getElementById('profileModal');
+    const closeProfileModalBtn = document.getElementById('closeProfileModalBtn');
+    const saveProfileBtn = document.getElementById('saveProfileBtn');
+    const profileName = document.getElementById('profileName');
+    const profileRole = document.getElementById('profileRole');
+    const profileCompany = document.getElementById('profileCompany');
 
     // Historique
     const toggleHistoryBtn = document.getElementById('toggleHistoryBtn');
@@ -32,43 +41,79 @@ document.addEventListener('DOMContentLoaded', () => {
     const historyList = document.getElementById('historyList');
     const clearHistoryBtn = document.getElementById('clearHistoryBtn');
 
+    // Easter Egg Bullshit
+    const bullshitText = document.getElementById('bullshitText');
+    const regenBullshit = document.getElementById('regenBullshit');
+    const bullshitPhrases = [
+        "\"Il faut auditer nos synergies agiles sur ce livrable.\"",
+        "\"On va adresser ce point en mode brainstorming transverse.\"",
+        "\"Il est urgent de ne rien faire en attendant le go-chief.\"",
+        "\"Faisons un point de alignment to be on the same page.\"",
+        "\"C'est un quick win à fort ROI stratégique.\""
+    ];
+    regenBullshit.addEventListener('click', () => {
+        const rand = bullshitPhrases[Math.floor(Math.random() * bullshitPhrases.length)];
+        bullshitText.textContent = rand;
+    });
+
     const API_URL = 'https://corporate-translator.bonjour7858.workers.dev';
 
-    // --- SYSTÈMEME DE COMPTE : Vérification du Statut VIP local ---
+    // Système de Toast
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `pointer-events-auto px-4 py-2.5 rounded-xl text-xs font-medium shadow-xl border transition duration-300 fade-in flex items-center gap-2 ${
+            type === 'success' ? 'bg-brand-panel border-brand-accent text-white' : 'bg-brand-panel border-amber-500 text-amber-400'
+        }`;
+        toast.innerHTML = `<span>${message}</span>`;
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 300);
+        }, 2500);
+    }
+
+    // --- Gestion VIP & Profil ---
     function checkVipStatus() {
         const isVip = localStorage.getItem('corp_translator_vip') === 'true';
         if (isVip) {
             userBadge.textContent = "Compte VIP 🌟";
             userBadge.className = "text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30";
             openVipModalBtn.innerHTML = `🌟 VIP Actif`;
+            openVipProfileBtn.classList.remove('hidden');
+            openVipProfileBtn.classList.add('flex');
+            
+            // Charger les infos du profil
+            profileName.value = localStorage.getItem('corp_profile_name') || '';
+            profileRole.value = localStorage.getItem('corp_profile_role') || '';
+            profileCompany.value = localStorage.getItem('corp_profile_company') || '';
         }
     }
     checkVipStatus();
 
-    // Ouverture / Fermeture sécurisée de la modale VIP
-    openVipModalBtn.addEventListener('click', () => {
-        vipModal.classList.remove('hidden');
+    openVipModalBtn.addEventListener('click', () => vipModal.classList.remove('hidden'));
+    closeVipModalBtn.addEventListener('click', () => vipModal.classList.add('hidden'));
+    vipModal.addEventListener('click', (e) => { if (e.target === vipModal) vipModal.classList.add('hidden'); });
+
+    openVipProfileBtn.addEventListener('click', () => profileModal.classList.remove('hidden'));
+    closeProfileModalBtn.addEventListener('click', () => profileModal.classList.add('hidden'));
+    profileModal.addEventListener('click', (e) => { if (e.target === profileModal) profileModal.classList.add('hidden'); });
+
+    saveProfileBtn.addEventListener('click', () => {
+        localStorage.setItem('corp_profile_name', profileName.value.trim());
+        localStorage.setItem('corp_profile_role', profileRole.value.trim());
+        localStorage.setItem('corp_profile_company', profileCompany.value.trim());
+        profileModal.classList.add('hidden');
+        showToast('Profil VIP enregistré avec succès !');
     });
 
-    closeVipModalBtn.addEventListener('click', () => {
-        vipModal.classList.add('hidden');
-    });
-
-    // Fermeture en cliquant en dehors de la modale
-    vipModal.addEventListener('click', (e) => {
-        if (e.target === vipModal) {
-            vipModal.classList.add('hidden');
-        }
-    });
-
-    // Activation du code secret VIP (fictif pour tester : VIP-BONJOUR-2026)
     activateVipBtn.addEventListener('click', () => {
         const code = vipCodeInput.value.trim();
         if (code === 'VIP-BONJOUR-2026') {
             localStorage.setItem('corp_translator_vip', 'true');
             vipModal.classList.add('hidden');
             checkVipStatus();
-            alert('Compte mis à niveau ! Bienvenue dans l\'espace VIP.');
+            showToast('Félicitations ! Compte VIP activé 🌟');
         } else {
             vipErrorMsg.textContent = "Code d'activation invalide.";
             vipErrorMsg.classList.remove('hidden');
@@ -104,9 +149,27 @@ document.addEventListener('DOMContentLoaded', () => {
         outputActions.classList.add('hidden');
         placeholderText.classList.remove('hidden');
         copyBtn.disabled = true;
+        readTime.classList.add('hidden');
     }
 
-    // --- Traduction ---
+    // Effet machine à écrire
+    function typeWriterEffect(text, element, callback) {
+        element.textContent = '';
+        element.classList.remove('hidden');
+        let i = 0;
+        function typing() {
+            if (i < text.length) {
+                element.textContent += text.charAt(i);
+                i++;
+                setTimeout(typing, 10);
+            } else if (callback) {
+                callback();
+            }
+        }
+        typing();
+    }
+
+    // --- Traduction & Intégration du profil VIP ---
     async function translateText() {
         const text = inputText.value.trim();
         if (!text) return;
@@ -118,19 +181,31 @@ document.addEventListener('DOMContentLoaded', () => {
         outputActions.classList.add('hidden');
         loader.classList.remove('hidden');
         copyBtn.disabled = true;
+        readTime.classList.add('hidden');
 
         let toneInstruction = "Rends ce message extrêmement professionnel, diplomatique et élégant.";
         if (currentTone === 'firm') {
             toneInstruction = "Rends ce message poli mais extrêmement ferme, direct et sans équivoque (style passif-agressif corporate).";
         } else if (currentTone === 'ceo') {
             toneInstruction = "Rends ce message ultra-concis, percutant, orienté stratégie et ROI (style CEO).";
+        } else if (currentTone === 'sarcastic') {
+            toneInstruction = "Rends ce message faussement flatteur, hautement hypocrite, bourré de fausse bienveillance et dégoulinant de fausse gratitude.";
         }
 
         const langInstruction = outputLang.value === 'en' 
             ? "Réponds UNIQUEMENT en anglais (Corporate English professionnel)." 
             : "Réponds UNIQUEMENT en français.";
 
-        const finalPrompt = `Consignes de style : ${toneInstruction} ${langInstruction}\n\nMessage brut à reformuler : "${text}"`;
+        // Injection du profil VIP si configuré
+        let profileContext = "";
+        const pName = localStorage.getItem('corp_profile_name');
+        const pRole = localStorage.getItem('corp_profile_role');
+        const pCompany = localStorage.getItem('corp_profile_company');
+        if (localStorage.getItem('corp_translator_vip') === 'true' && (pName || pRole || pCompany)) {
+            profileContext = ` Signature à inclure à la fin : Signé par ${pName || ''}, ${pRole || ''} chez ${pCompany || ''}.`;
+        }
+
+        const finalPrompt = `Consignes de style : ${toneInstruction} ${langInstruction}${profileContext}\n\nMessage brut à reformuler : "${text}"`;
 
         try {
             const response = await fetch(API_URL, {
@@ -143,11 +218,18 @@ document.addEventListener('DOMContentLoaded', () => {
             loader.classList.add('hidden');
 
             if (response.ok && data.result) {
-                outputText.textContent = data.result;
-                outputText.classList.remove('hidden');
                 outputActions.classList.remove('hidden');
                 copyBtn.disabled = false;
-                saveToHistory(text, data.result);
+                
+                // Calcul du temps de lecture (~200 mots par minute)
+                const words = data.result.split(/\s+/).length;
+                const seconds = Math.max(1, Math.ceil(words / 3.5));
+                readTime.textContent = `⏱️ ~${seconds}s de lecture`;
+                readTime.classList.remove('hidden');
+
+                typeWriterEffect(data.result, outputText, () => {
+                    saveToHistory(text, data.result);
+                });
             } else {
                 outputText.textContent = "Erreur : " + (data.error || "Impossible de traiter la demande.");
                 outputText.classList.remove('hidden');
@@ -167,6 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     copyBtn.addEventListener('click', () => {
         navigator.clipboard.writeText(outputText.textContent).then(() => {
+            showToast('Texte copié dans le presse-papier !');
             copyBtnText.textContent = "Copié !";
             setTimeout(() => { copyBtnText.textContent = "Copier"; }, 2000);
         });
@@ -220,5 +303,6 @@ document.addEventListener('DOMContentLoaded', () => {
     clearHistoryBtn.addEventListener('click', () => {
         localStorage.removeItem('corp_translator_history');
         renderHistory();
+        showToast('Historique vidé.', 'info');
     });
 });
