@@ -36,8 +36,11 @@
 </head>
 <body class="bg-brand-dark text-gray-100 min-h-screen antialiased flex flex-col relative overflow-x-hidden">
 
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
     <!-- Header / Navbar -->
-    <header class="border-b border-brand-border bg-brand-dark/80 backdrop-blur-sm sticky top-0 z-40">
+    <header class="border-b border-brand-border bg-brand-dark/85 backdrop-blur-md sticky top-0 z-40">
         <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <div class="p-2 rounded-xl bg-brand-accent/10 border border-brand-accent/20">
@@ -45,19 +48,24 @@
                 </div>
                 <h1 class="text-xl font-bold text-white tracking-tight flex items-center gap-2">
                     Corporate Translator
-                    <!-- Indicateur de Compte Local -->
                     <span id="userBadge" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-gray-800 text-gray-400 border border-brand-border">Free Tier</span>
                 </h1>
             </div>
             
             <div class="flex items-center gap-2 sm:gap-3">
+                <!-- Bouton Profil VIP (Affiché si VIP actif) -->
+                <button id="openVipProfileBtn" type="button" class="hidden items-center gap-1.5 px-3 py-1.5 rounded-xl bg-brand-panel border border-amber-500/30 text-amber-400 font-medium text-xs hover:bg-gray-800 transition cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                    Mon Profil VIP
+                </button>
+
                 <!-- Bouton Pass VIP Leetchi -->
                 <button id="openVipModalBtn" type="button" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-bold text-xs shadow-lg shadow-yellow-500/10 hover:brightness-110 transition cursor-pointer">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
                     Pass VIP Leetchi
                 </button>
 
-                <button id="toggleHistoryBtn" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-brand-border bg-brand-panel hover:bg-gray-800 text-xs font-medium text-gray-300 transition">
+                <button id="toggleHistoryBtn" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-brand-border bg-brand-panel hover:bg-gray-800 text-xs font-medium text-gray-300 transition cursor-pointer">
                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     Historique
                 </button>
@@ -76,6 +84,13 @@
             <p class="mt-4 text-lg text-gray-400 max-w-2xl mx-auto">
                 Reformulez instantanément vos retours bruts en versions policées, diplomatiques et taillées pour vos échanges stratégiques.
             </p>
+            
+            <!-- Easter Egg : Bullshit Generator -->
+            <div class="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-brand-panel border border-brand-border text-xs text-gray-300 shadow-sm">
+                <span class="text-brand-accent font-semibold">💡 Inspiration du jour :</span>
+                <span id="bullshitText" class="italic text-gray-400">"Il faut auditer nos synergies agiles sur ce livrable."</span>
+                <button id="regenBullshit" class="ml-2 p-1 hover:text-white transition cursor-pointer" title="Générer un autre jargon">🔄</button>
+            </div>
         </div>
 
         <!-- Tonalités & Langue -->
@@ -84,15 +99,16 @@
                 <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-2">Tonalité :</span>
                 
                 <div class="flex items-center gap-1.5 bg-brand-dark p-1 rounded-xl border border-brand-border">
-                    <button type="button" data-tone="standard" class="tone-btn px-3 py-1.5 rounded-lg text-xs font-medium text-white bg-brand-accent transition">Standard</button>
-                    <button type="button" data-tone="firm" class="tone-btn px-3 py-1.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white transition">Poli & Ferme</button>
-                    <button type="button" data-tone="ceo" class="tone-btn px-3 py-1.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white transition">Exécutif (Concis)</button>
+                    <button type="button" data-tone="standard" class="tone-btn px-3 py-1.5 rounded-lg text-xs font-medium text-white bg-brand-accent transition cursor-pointer">Standard</button>
+                    <button type="button" data-tone="firm" class="tone-btn px-3 py-1.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white transition cursor-pointer">Poli & Ferme</button>
+                    <button type="button" data-tone="ceo" class="tone-btn px-3 py-1.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white transition cursor-pointer">Exécutif (Concis)</button>
+                    <button type="button" data-tone="sarcastic" class="tone-btn px-3 py-1.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white transition cursor-pointer">✨ Hypocrite / Flatteur</button>
                 </div>
             </div>
             
             <div class="flex items-center gap-2 border-t md:border-t-0 md:border-l border-brand-border pt-3 md:pt-0 md:pl-4">
                 <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Langue :</span>
-                <select id="outputLang" class="bg-brand-dark text-xs border border-brand-border rounded-xl px-3 py-1.5 text-white focus:outline-none focus:border-brand-accent transition">
+                <select id="outputLang" class="bg-brand-dark text-xs border border-brand-border rounded-xl px-3 py-1.5 text-white focus:outline-none focus:border-brand-accent transition cursor-pointer">
                     <option value="fr" selected>🇫🇷 Français</option>
                     <option value="en">🇺🇸 Anglais (Corporate)</option>
                 </select>
@@ -107,7 +123,7 @@
                 <div class="px-5 py-3.5 border-b border-brand-border flex items-center justify-between bg-brand-dark/50">
                     <div class="flex items-center gap-2">
                         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                        <h3 class="text-sm font-semibold text-white"> MESSAGE BRUT / FRANC</h3>
+                        <h3 class="text-sm font-semibold text-white">MESSAGE BRUT / FRANC</h3>
                     </div>
                     <span id="charCount" class="text-xs font-mono text-gray-500">0/500</span>
                 </div>
@@ -115,8 +131,8 @@
                     <textarea id="inputText" rows="9" placeholder="Écrivez votre message sans filtre ici..." class="w-full bg-transparent p-4 text-gray-100 placeholder:text-gray-600 focus:outline-none resize-none no-scrollbar text-base leading-relaxed" maxlength="500"></textarea>
                 </div>
                 <div class="px-5 py-3.5 border-t border-brand-border flex justify-between items-center bg-brand-dark/50">
-                    <button id="clearBtn" class="text-xs font-medium text-gray-500 hover:text-gray-300 transition">Effacer</button>
-                    <button id="submitBtn" class="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold text-white bg-brand-accent hover:bg-brand-accent-hover transition shadow-lg shadow-brand-accent/20 disabled:opacity-50">
+                    <button id="clearBtn" class="text-xs font-medium text-gray-500 hover:text-gray-300 transition cursor-pointer">Effacer</button>
+                    <button id="submitBtn" class="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold text-white bg-brand-accent hover:bg-brand-accent-hover transition shadow-lg shadow-brand-accent/20 disabled:opacity-50 cursor-pointer">
                         <span id="submitBtnText">Optimiser</span>
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                     </button>
@@ -130,10 +146,13 @@
                         <svg class="w-4 h-4 text-brand-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                         <h3 class="text-sm font-semibold text-white">FORMULATION CORPORATE</h3>
                     </div>
-                    <button id="copyBtn" class="flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-gray-300 rounded-lg bg-brand-dark border border-brand-border hover:border-gray-600 transition disabled:opacity-40" disabled>
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
-                        <span id="copyBtnText">Copier</span>
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <span id="readTime" class="text-[10px] font-mono text-gray-500 hidden"></span>
+                        <button id="copyBtn" class="flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-gray-300 rounded-lg bg-brand-dark border border-brand-border hover:border-gray-600 transition disabled:opacity-40 cursor-pointer" disabled>
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                            <span id="copyBtnText">Copier</span>
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="p-2 min-h-[260px] flex flex-col justify-between">
@@ -147,7 +166,7 @@
                     </div>
                     <p id="outputText" class="hidden p-4 text-gray-100 text-base leading-relaxed fade-in"></p>
                     <div id="outputActions" class="hidden border-t border-brand-border/50 pt-2 px-2 flex justify-end">
-                        <button id="regenBtn" class="flex items-center gap-1 text-xs font-medium text-gray-400 hover:text-white p-1.5 rounded transition">
+                        <button id="regenBtn" class="flex items-center gap-1 text-xs font-medium text-gray-400 hover:text-white p-1.5 rounded transition cursor-pointer">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 003 12c0 2.21.896 4.21 2.344 5.344m2.656 2.228A8.001 8.001 0 0021 12c0-2.21-.896-4.21-2.344-5.344m-2.656-2.228A8.001 8.001 0 003 12a8 8 0 0113.166-4.732L19 7v5h-5"></path></svg>
                             Régénérer
                         </button>
@@ -168,7 +187,7 @@
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
                 </div>
                 <h3 class="text-xl font-bold text-white">Débloquez le Pass VIP</h3>
-                <p class="text-xs text-gray-400">Soutenez le projet via notre cagnotte Leetchi pour obtenir un accès permanent et un badge de compte exclusif.</p>
+                <p class="text-xs text-gray-400">Soutenez le projet via notre cagnotte Leetchi pour obtenir un accès permanent et un profil personnalisé.</p>
             </div>
 
             <div class="space-y-3 bg-brand-dark p-4 rounded-2xl border border-brand-border text-xs">
@@ -192,6 +211,35 @@
         </div>
     </div>
 
+    <!-- MODAL PROFIL VIP -->
+    <div id="profileModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-brand-panel border border-brand-border rounded-3xl max-w-md w-full p-6 shadow-2xl relative space-y-4">
+            <button id="closeProfileModalBtn" class="absolute top-4 right-4 text-gray-400 hover:text-white cursor-pointer">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <div class="text-center space-y-1">
+                <h3 class="text-lg font-bold text-white">⚙️ Paramètres du Profil VIP</h3>
+                <p class="text-xs text-gray-400">L'IA intégrera ces informations pour signer vos messages automatiquement.</p>
+            </div>
+
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="text-gray-400 block mb-1">Votre Prénom / Nom :</label>
+                    <input type="text" id="profileName" placeholder="ex: Jean Dupont" class="w-full bg-brand-dark border border-brand-border rounded-xl px-3 py-2 text-white focus:outline-none focus:border-brand-accent">
+                </div>
+                <div>
+                    <label class="text-gray-400 block mb-1">Votre Poste :</label>
+                    <input type="text" id="profileRole" placeholder="ex: Project Manager" class="w-full bg-brand-dark border border-brand-border rounded-xl px-3 py-2 text-white focus:outline-none focus:border-brand-accent">
+                </div>
+                <div>
+                    <label class="text-gray-400 block mb-1">Entreprise / Département :</label>
+                    <input type="text" id="profileCompany" placeholder="ex: Tech Solutions" class="w-full bg-brand-dark border border-brand-border rounded-xl px-3 py-2 text-white focus:outline-none focus:border-brand-accent">
+                </div>
+                <button id="saveProfileBtn" class="w-full py-2.5 bg-brand-accent hover:bg-brand-accent-hover text-white font-semibold rounded-xl transition cursor-pointer mt-2">Enregistrer les modifications</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Drawer Historique -->
     <aside id="historyDrawer" class="fixed top-0 right-0 h-full w-80 bg-brand-panel border-l border-brand-border shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col">
         <div class="p-4 border-b border-brand-border flex items-center justify-between">
@@ -199,7 +247,7 @@
                 <svg class="w-4 h-4 text-brand-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 Dernières traductions
             </h3>
-            <button id="closeHistoryBtn" class="text-gray-400 hover:text-white p-1">
+            <button id="closeHistoryBtn" class="text-gray-400 hover:text-white p-1 cursor-pointer">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
         </div>
@@ -207,7 +255,7 @@
             <p class="text-gray-600 text-center py-8">Aucun historique pour le moment.</p>
         </div>
         <div class="p-4 border-t border-brand-border">
-            <button id="clearHistoryBtn" class="w-full py-2 text-xs font-medium text-red-400 hover:bg-red-500/10 rounded-lg transition border border-red-500/20">Vider l'historique</button>
+            <button id="clearHistoryBtn" class="w-full py-2 text-xs font-medium text-red-400 hover:bg-red-500/10 rounded-lg transition border border-red-500/20 cursor-pointer">Vider l'historique</button>
         </div>
     </aside>
 
